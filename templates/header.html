@@ -1,0 +1,128 @@
+{% load static %}
+<header style="background-color: #ffffff; position: fixed;">
+
+
+    <div style="margin-left: -8%;">
+        <a href="/" >
+            <ion-icon name="add-circle" ></ion-icon> 
+            <img src="{% static 'assets/images/logo.png' %}" alt="Upload Icon" style="width: 180px; height: 35px; margin-left: 90%;">
+        </a>
+    </div>
+    <div class="header_inner">
+        
+
+                        <div style="margin-left: 34%;">
+                            <a href="/settings" >
+                                <ion-icon name="add-circle" ></ion-icon> 
+                                <img src="{% static 'assets/images/home.png' %}" alt="Upload Icon" style="width: 30px; height: 30px; margin-left: 90%;">
+                            </a>
+                        </div>
+
+                        <div style="margin-left: 3%;">
+                            <a href="#" >
+                                <ion-icon name="add-circle" ></ion-icon> 
+                                <img src="{% static 'assets/images/video.png' %}" alt="Upload Icon" style="width: 30px; height: 30px; margin-left: 90%;">
+                            </a>
+                        </div>
+                        
+                        <div style="margin-left: 3%;">
+                            <a href="#" >
+                                <ion-icon name="add-circle" ></ion-icon> 
+                                <img src="{% static 'assets/images/chat.png' %}" alt="Upload Icon" style="width: 30px; height: 30px; margin-left: 90%;">
+                            </a>
+                        </div>
+
+                        <div style="margin-left: 3%;">
+                            <a href="#" >
+                                <ion-icon name="add-circle" ></ion-icon> 
+                                <img src="{% static 'assets/images/game.png' %}" alt="Upload Icon" style="width: 30px; height: 30px; margin-left: 90%;">
+                            </a>
+                        </div>
+
+
+        <div class="right-side lg:pr-3">
+            <a href="#" style="margin-right: 1%;">
+                <ion-icon name="add-circle" ></ion-icon> 
+                <img src="{% static 'assets/images/add2.png' %}" alt="Upload Icon" style="width: 40px; height: 40px; margin-right: 60%;">
+            </a>
+
+
+            <div uk-dropdown="pos: top-right;mode:click ; animation: uk-animation-slide-bottom-small" class="header_dropdown">
+                <div class="px-4 py-3 -mx-5 -mt-4 mb-5 border-b">
+                    <h4>Explore Plants</h4>
+                </div>
+                <div class="flex justify-center flex-center text-center">
+
+                    <div class="flex flex-col choose-upload text-center">
+                        <div class="bg-gray-100 border-2 border-dashed flex flex-col h-24 items-center justify-center relative w-full rounded-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-12" style="color: #46A094;">
+                                <path d="M5.5 13a3.5 3.5 0 01-.369-6.98 4 4 0 117.753-1.977A4.5 4.5 0 1113.5 13H11V9.413l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13H5.5z" />
+                                <path d="M9 13h2v5a1 1 0 11-2 0v-5z" />
+                            </svg>
+                        </div>
+                        <form action="upload" method="POST" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <p class="my-3 leading-6" style="color: #2ecc71;"> Upload Plant Pics</p>
+                            <div>
+                                <input type="file" name="image_upload">
+                                <textarea class="button soft-warning small" name="caption" placeholder="Add a caption..." style="border: 2px solid #46A094;"></textarea>
+                                <br>
+                                <button class="button bg-blue-700" type="submit" style="background-color: #46A094; border: none; padding: 8px 12px; border-radius: 5px;">Upload</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="uk-flex uk-flex-column choose-upload" hidden>
+                        <div class="mx-auto flex flex-col h-24 items-center justify-center relative w-full rounded-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-12" style="color: #2ecc71;">
+                                <path fill-rule="evenodd" d="M2 9.5A3.5 3.5 0 005.5 13H9v2.586l-1.293-1.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 15.586V13h2.5a4.5 4.5 0 10-.616-8.958 4.002 4.002 0 10-7.753 1.977A3.5 3.5 0 002 9.5zm9 3.5H9V8a1 1 0 012 0v5z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <p class="my-3 leading-6" style="color: #2ecc71;"> Import videos from YouTube <br> Copy / Paste your video link here </p>
+                        <form class="uk-grid-small" uk-grid>
+                            <div class="uk-width-expand">
+                                <input type="text" class="uk-input uk-form-small  bg-gray-200 " style="box-shadow:none" placeholder="Paste link">
+                            </div>
+                            <div class="uk-width-auto"> <button type="submit" class="button soft-warning -ml-2" style="background-color: #2ecc71; border: none; padding: 8px 12px; border-radius: 5px;">Import</button> </div>
+                        </form>
+                        <a href="#" class="uk-text-muted mt-3 uk-link" uk-toggle="target: .choose-upload ; animation: uk-animation-slide-left-small, uk-animation-slide-right-medium; queued: true" style="color: #2ecc71;">Or Upload Video</a>
+                    </div>
+
+                </div>
+                <div class="px-4 py-3 -mx-5 -mb-4 mt-5 border-t text-sm" style="color: #2ecc71;">
+                    Your image size must be maximum 999MB
+                </div>
+            </div>
+
+
+
+
+
+            <form action="/search" method="POST" style="margin-left: 3%;">
+                {% csrf_token %}
+                <div class="left-side">
+                    <div id="logo" class="uk-hidden@s">
+                        <a href="home.html">
+                            <b><h1 style="text-transform: uppercase; color: #000000;">Herbal Hub</h1></b>
+                        </a>
+                    </div>
+                    <input type="text" name="username" placeholder="Search for Botanists.." style="border: 2px solid #3cdb0b; padding: 8px; border-radius: 5px;">&nbsp; &nbsp;
+                    <button type="submit" style="background-color: #ffffff;; border: none; padding: 8px 12px; border-radius: 5px;"><i class="fa fa-search fa-1x" style="color: #3cdb0b;"></i></button>
+                </div>
+            </form>
+
+
+            <a href="#">
+                <img src="{{user_profile.profileimg.url}}" class="header-avatar" alt="">
+            </a>
+            <div uk-drop="mode: click;offset:9" class="header_dropdown profile_dropdown border-t">
+                <ul>
+                    <li><a href="/settings" style="color: #2ecc71;">Account settings</a></li>
+                    <li><a href="/profile/{{user}}" style="color: #2ecc71;">My Profile</a></li>
+                    <li><a href="logout" style="color: #2ecc71;">Log Out</a></li>
+                    
+                </ul>
+            </div>
+        </div>
+    </div>
+</header>

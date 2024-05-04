@@ -1,0 +1,103 @@
+{% load static %}
+
+<head>
+
+    <style>
+        .sidebar {
+            background-color: #ffffff;
+            width: 200px;
+            height: 100%;
+            position: fixed;
+            top: 64px; /* Height of your header */
+            left: 0;
+            overflow-x: hidden;
+            padding-top: 50px;
+        }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            padding: 20px 35px;
+            text-decoration: none;
+            color: black;
+        }
+
+        .sidebar-icon {
+            width: 30px;
+            height: 30px;
+            margin-right: 10px;
+        }
+
+        .sidebar-text {
+            font-size: 15px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <a href="#" class="sidebar-link">
+            <img src="{% static 'assets/images/map.gif' %}" alt="Game Icon" class="sidebar-icon">
+            <span class="sidebar-text">Locations</span>
+        </a>
+        <a href="#" class="sidebar-link">
+            <img src="{% static 'assets/images/plants.gif' %}" alt="Chat Icon" class="sidebar-icon" style="width: 25%; height: 25%;" >
+            <span class="sidebar-text">Plants</span>
+        </a>
+        <a href="#" class="sidebar-link">
+            <img src="{% static 'assets/images/pp.gif' %}" alt="Video Icon" class="sidebar-icon">
+            <span class="sidebar-text">Groups</span>
+        </a>
+        <a href="#" class="sidebar-link">
+            <img src="{% static 'assets/images/buy.gif' %}" alt="Friends Icon" class="sidebar-icon">
+            <span class="sidebar-text">Buy & Sell</span>
+        </a>
+        <a href="#" class="sidebar-link">
+            <img src="{% static 'assets/images/u.gif' %}" alt="Friends Icon" class="sidebar-icon">
+            <span class="sidebar-text">Friends</span>
+        </a>
+        <a href="#" class="sidebar-link">
+            <img src="{% static 'assets/images/questions.gif' %}" alt="Friends Icon" class="sidebar-icon">
+            <span class="sidebar-text">Questions</span>
+        </a>
+        <a href="#" class="sidebar-link">
+            <img src="{% static 'assets/images/settings.gif' %}" alt="Friends Icon" class="sidebar-icon">
+            <span class="sidebar-text">Settings</span>
+        </a>
+    </div>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
