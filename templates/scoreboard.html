@@ -1,0 +1,284 @@
+{% load static %}
+{% load custom_filters %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="{% static 'assets/images/fav2.png' %}" rel="icon" type="image/png">
+    <title>Herbal Hub - Scoreboard</title>
+    <link rel="stylesheet" href="{% static 'assets/css/icons.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/uikit.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/tailwind.css' %}">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nerko+One&family=SUSE:wght@100..800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,100..700;1,100..700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #04a84e, #033a3b);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        header {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+        .header-logo img {
+            width: 95px;
+            height: auto;
+        }
+        .header-nav {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            flex-grow: 1;
+        }
+        .header-nav a {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+        }
+        .header-nav a img {
+            width: 45px;
+        }
+        .header-nav a:hover {
+            color: #32ff7e;
+            text-decoration: underline;
+        }
+        .profile-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .profile-info p {
+            margin: 0;
+        }
+
+        .badge-container {
+            width: 80px;
+            position: absolute;
+            top: 70px;
+            right: 20px;
+        }
+        .badge-img {
+            border: 3px solid;
+            border-radius: 50%;
+            width: 70px;
+            height: 70px;
+        }
+
+        .username {
+            color: #2dd881;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+        .score {
+            border: 2px solid #e9b304;
+            border-radius: 20%;
+            padding: 5px 15px;
+            color: #21e99c;
+            font-weight: bold;
+        }
+
+        .scoreboard-table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 100px;
+        }
+        .scoreboard-table th, .scoreboard-table td {
+            padding: 15px;
+            border: 1px solid #ddd;
+            text-align: center; 
+        }
+        .scoreboard-table th {
+            background-color: #444;
+        }
+        .scoreboard-table tr:nth-child(even) {
+            background-color: #333;
+        }
+        .scoreboard-table tr:hover {
+            background-color: #555;
+        }
+        .scoreboard-table .highlight {
+            background-color: rgba(50, 255, 126, 0.3);
+            color: #ffffff;
+            font-weight: bold;
+        }
+        .scoreboard-table img {
+            width: 40px;
+            height: auto;
+        }
+
+        .badge-path-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 50px auto;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 15px;
+            width: 80%;
+        }
+        .badge-path-item {
+            text-align: center;
+            margin: 0 20px;
+            color: #e9e9e9;
+        }
+        .badge-path-item img {
+            width: 60px;
+            height: 60px;
+            border: 3px solid #fff;
+            border-radius: 50%;
+        }
+        .badge-path-item span {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .progress-bar {
+            height: 10px;
+            background: #32ff7e;
+            border-radius: 5px;
+            width: 150px;
+            position: relative;
+        }
+        .view-button {
+            background-color: #32ff7e;
+            color: #033a3b;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            text-decoration: none;
+            transition: transform 0.2s;
+            display: inline-block;
+           
+        }
+
+        .view-button:hover {
+            background-color: #2dd881;
+            color: #ffffff;
+            transform: scale(1.1);
+            animation: bounce 1s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-logo">
+            <img src="{% static 'assets/images/herbalLogo.png' %}" alt="Herbal Hub Logo">
+        </div>
+        <nav class="header-nav">
+            <a href="/" title="Home"><img src="{% static 'images/home123.png' %}" alt="Home"></a>
+            <a href="/farm" title="Game"><img src="{% static 'images/console123.png' %}" alt="Game"></a>
+            <a href="/scoreboard" title="Game"><img src="{% static 'images/score.png' %}" alt="Scoreboard"></a>
+        </nav>
+        <div class="profile-info">
+            <p class="score">SCORE: {{ user_score }}</p>
+            <p class="username">{{ request.user.username }}</p>
+        </div>
+    </header>
+
+    <div class="badge-container">
+        {% if badge == "Gold" %}
+        <img src="{% static 'assets/images/goldBadge.png' %}" alt="Gold Badge" class="badge-img" style="border-color: #f0d800;">
+        {% elif badge == "Silver" %}
+        <img src="{% static 'assets/images/silverBadge.png' %}" alt="Silver Badge" class="badge-img" style="border-color: #a7a7a7;">
+        {% elif badge == "Bronze" %}
+        <img src="{% static 'assets/images/bronzeBadge.png' %}" alt="Bronze Badge" class="badge-img" style="border-color: #cd7f32;">
+        {% elif badge == "Ultimate" %}
+        <img src="{% static 'assets/images/ultimate.png' %}" alt="Ultimate Badge" class="badge-img" style="border-color: #b275eb;">
+        {% endif %}
+    </div>
+
+    <div class="badge-path-container" style="margin-top: 80px;">
+        <div class="badge-path-item">
+            <img src="{% static 'assets/images/bronzeBadge.png' %}" alt="Bronze Badge">
+            <span>Bronze</span>
+        </div>
+        <div class="progress-bar"></div>
+        <div class="badge-path-item">
+            <img src="{% static 'assets/images/silverBadge.png' %}" alt="Silver Badge">
+            <span>Silver</span>
+        </div>
+        <div class="progress-bar"></div>
+        <div class="badge-path-item">
+            <img src="{% static 'assets/images/goldBadge.png' %}" alt="Gold Badge">
+            <span>Gold</span>
+        </div>
+        <div class="progress-bar"></div>
+        <div class="badge-path-item">
+            <img src="{% static 'assets/images/ultimate1.png' %}" alt="Ultimate Badge">
+            <span>Legend</span>
+        </div>
+    </div>
+
+    <table class="scoreboard-table" style="margin-top: -40px; margin: 0 auto;">
+        <thead>
+            <tr>
+                <th style="text-align: center;">Username</th>
+                <th style="text-align: center;">Score</th>
+                <th style="text-align: center;">Badge</th>
+                <th style="text-align: center;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for profile in profiles %}
+            <tr class="{% if profile.user.username == request.user.username %}highlight{% endif %}">
+                <td style="text-align: center;">{{ profile.user.username }}</td>
+                <td style="text-align: center;">{{ profile.score }}</td>
+                <td style="text-align: center; align-items: center;  justify-content: center; display: flex;">
+                    {% if profile.badge == "Gold" %}
+                        <img src="{% static 'assets/images/goldBadge.png' %}" alt="Gold Badge" class="badge-img">
+                    {% elif profile.badge == "Silver" %}
+                        <img src="{% static 'assets/images/silverBadge.png' %}" alt="Silver Badge" class="badge-img">
+                    {% elif profile.badge == "Bronze" %}
+                        <img src="{% static 'assets/images/bronzeBadge.png' %}" alt="Bronze Badge" class="badge-img">
+                    {% elif profile.badge == "Legend" %}
+                        <img src="{% static 'assets/images/ultimate1.png' %}" alt="Legend Badge" class="badge-img">
+                    {% else %}
+                        <img src="{% static 'assets/images/silverBadge.png' %}" alt="No Badge" class="badge-img">
+                    {% endif %}
+                </td>
+                <td style="text-align: center;">
+                    <a href="/viewgarden/{{ profile.user.id }}" class="view-button">View Garden</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</body>
+</html>

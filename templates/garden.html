@@ -1,0 +1,75 @@
+{% load static %}
+{% load custom_filters %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="{% static 'assets/images/fav2.png' %}" rel="icon" type="image/png">
+    <title>Your Garden</title>
+    <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: white;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        tr:hover {
+            background-color: #ddd;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Your Garden Boxes</h1>
+
+<table>
+    <thead>
+        <tr>
+            <th>User</th>
+            <th>Row</th>
+            <th>Column</th>
+            <th>Plant</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for box in garden_boxes %}
+        <tr>
+            <td>{{ box.user.username }}</td>
+            <td>{{ box.row }}</td>
+            <td>{{ box.col }}</td>
+            <td>{{ box.plant }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="4">No garden boxes found.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+</body>
+</html>

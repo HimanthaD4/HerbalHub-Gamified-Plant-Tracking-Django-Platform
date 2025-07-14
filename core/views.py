@@ -1,15 +1,215 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.models import User, auth
 from django.contrib import messages
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
-from .models import Profile, Post, LikePost, FollowersCount, Comment
-
+from .models import Profile,Plant, GardenBox
+import exifread
 from itertools import chain
 import random
+import os
+from django.core.files.storage import default_storage
+from django.conf import settings  # Ensure this import is correct
+from django.core.files.base import ContentFile
+from django.db.models import Q
+from geopy.distance import geodesic
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+import tensorflow as tf
+import numpy as np
+from django.core.files.storage import FileSystemStorage
+
+
+@login_required
+def save_garden(request):
+    if request.method == "POST":
+        garden_data = json.loads(request.body).get("garden", [])
+        
+        profile = Profile.objects.get(user=request.user)
+        total_price = 0
+        
+        for box_data in garden_data:
+            plant = box_data.get("plant")
+            row = box_data.get("row")
+            col = box_data.get("col")
+            price_map = {
+                "Aloe": 10,
+                "Mint": 15,
+              
+            }
+            total_price += price_map.get(plant, 0)  # Add plant price
+            
+            # Check if a plant already exists at this position for the user
+            garden_box, created = GardenBox.objects.update_or_create(
+                user=request.user,
+                row=row,
+                col=col,
+                defaults={'plant': plant}
+            )
+        
+        # Update profile score in the database
+        if profile.score >= total_price:
+            profile.score -= total_price
+            profile.save()
+            return JsonResponse({"success": True})
+        else:
+            return JsonResponse({"success": False, "error": "Not enough score"})
+    
+    return JsonResponse({"success": False})
+
+@login_required
+def farm(request):
+    profile = Profile.objects.get(user=request.user)
+    rows = list(range(1, 15))
+    cols = list(range(1, 11))
+    
+    # Retrieve garden boxes for the logged-in user
+    garden_boxes = GardenBox.objects.filter(user=request.user)
+    
+    return render(request, 'farm.html', {
+        'profile': profile,
+        'rows': rows,
+        'cols': cols,
+        'garden_boxes': garden_boxes,  # Add garden_boxes to the context
+    })   
 
 
 
+@login_required
+def viewgarden(request, user_id):
+    # Retrieve the profile based on the provided user_id
+    profile = get_object_or_404(Profile, user__id=user_id)
+    rows = list(range(1, 15))
+    cols = list(range(1, 11))
+    
+    # Retrieve garden boxes for the specified user
+    garden_boxes = GardenBox.objects.filter(user__id=user_id)
+    
+    return render(request, 'viewgarden.html', {
+        'profile': profile,
+        'rows': rows,
+        'cols': cols,
+        'garden_boxes': garden_boxes,  # Pass garden_boxes to the context
+    })
+
+
+
+
+
+
+@login_required(login_url='signin')
+def mapsearch(request):
+    plants_data = []
+    user_score = 0
+    user_badge = None
+
+    profile = Profile.objects.get(user=request.user)
+
+    if request.method == 'GET':
+        search_username = request.GET.get('username', '')
+        search_plant_name = request.GET.get('plant_name', '')
+        search_latitude = request.GET.get('latitude', '')
+        search_longitude = request.GET.get('longitude', '')
+
+        # Retrieve the user's profile, which contains score and badge information
+        user_profile = Profile.objects.get(user=request.user)
+        user_score = Profile.score
+        user_badge = Profile.badge
+
+        if search_latitude and search_longitude:
+            try:
+                lat = float(search_latitude)
+                lon = float(search_longitude)
+                plants = Plant.objects.all()
+
+                for plant in plants:
+                    if plant.latitude and plant.longitude:
+                        distance = geodesic((lat, lon), (plant.latitude, plant.longitude)).km
+                        if distance <= 50:
+                            plants_data.append({
+                                'lat': plant.latitude,
+                                'lng': plant.longitude,
+                                'plant_name': plant.plant_name,
+                                'username': plant.user.username,
+                                'distance': distance
+                            })
+            except ValueError:
+                pass  # Handle invalid latitude/longitude inputs
+        else:
+            plants = Plant.objects.filter(
+                Q(user__username__icontains=search_username) |
+                Q(plant_name__icontains=search_plant_name)
+            )
+            for plant in plants:
+                if plant.latitude and plant.longitude:
+                    plants_data.append({
+                        'lat': plant.latitude,
+                        'lng': plant.longitude,
+                        'plant_name': plant.plant_name,
+                        'username': plant.user.username
+                    })
+
+    return render(request, 'mapsearch.html', {
+        'plants_data': plants_data,
+        'profile': profile,
+        'user_score': user_score,
+        'user_badge': user_badge
+    })
+
+
+@login_required(login_url='signin')
+def scoreboard(request):
+    # Get the logged-in user's profile
+    profile = Profile.objects.get(user=request.user)
+    user_score = profile.score  
+    user_badge = profile.badge  
+
+    # Sort all profiles by score in descending order
+    profiles = Profile.objects.all().order_by('-score')
+
+    # Prepare chart data for rendering
+    chart_data = [
+        {"username": prof.user.username, "score": prof.score}
+        for prof in profiles
+    ]
+
+    return render(request, 'scoreboard.html', {
+        'profiles': profiles,
+        'user_score': user_score,  
+        'user_badge': user_badge, 
+        'chart_data': chart_data  
+    })
+
+
+
+@login_required(login_url='signin')
+def settings(request):
+    user_profile = Profile.objects.get(user=request.user)
+
+    if request.method == 'POST':
+        
+        if request.FILES.get('image') == None:
+            image = user_profile.profileimg
+            bio = request.POST['bio']
+            location = request.POST['location']
+
+            user_profile.profileimg = image
+            user_profile.bio = bio
+            user_profile.location = location
+            user_profile.save()
+        if request.FILES.get('image') != None:
+            image = request.FILES.get('image')
+            bio = request.POST['bio']
+            location = request.POST['location']
+
+            user_profile.profileimg = image
+            user_profile.bio = bio
+            user_profile.location = location
+            user_profile.save()
+        
+        return redirect('settings')
+    return render(request, 'setting.html', {'user_profile': user_profile})
 
 
 
@@ -34,48 +234,89 @@ def index(request):
     user_object = User.objects.get(username=request.user.username)
     user_profile = Profile.objects.get(user=user_object)
 
-    user_following_list = []
-    feed = []
-
-    user_following = FollowersCount.objects.filter(follower=request.user.username)
-
-    for users in user_following:
-        user_following_list.append(users.user)
-
-    for usernames in user_following_list:
-        feed_lists = Post.objects.filter(user=usernames)
-        feed.append(feed_lists)
-
-    feed_list = list(chain(*feed))
-
-    # user suggestion starts
-    all_users = User.objects.all()
-    user_following_all = []
-
-    for user in user_following:
-        user_list = User.objects.get(username=user.user)
-        user_following_all.append(user_list)
-    
-    new_suggestions_list = [x for x in list(all_users) if (x not in list(user_following_all))]
-    current_user = User.objects.filter(username=request.user.username)
-    final_suggestions_list = [x for x in list(new_suggestions_list) if ( x not in list(current_user))]
-    random.shuffle(final_suggestions_list)
-
     username_profile = []
     username_profile_list = []
-
-    for users in final_suggestions_list:
-        username_profile.append(users.id)
 
     for ids in username_profile:
         profile_lists = Profile.objects.filter(id_user=ids)
         username_profile_list.append(profile_lists)
 
-    suggestions_username_profile_list = list(chain(*username_profile_list))
+    return render(request, 'index.html', {'user_profile': user_profile,})
 
 
-    return render(request, 'index.html', {'user_profile': user_profile, 'posts':feed_list, 'suggestions_username_profile_list': suggestions_username_profile_list[:4]})
+@login_required(login_url='signin')
+def map_game(request):
+    user_object = User.objects.get(username=request.user.username)
+    user_profile = Profile.objects.get(user=user_object)
+    profile = Profile.objects.get(user=request.user)  # This is redundant, you can use user_profile instead
 
+    if request.method == 'POST':
+        plant_name = request.POST.get('plantName')
+        image = request.FILES.get('image_upload')
+        latitude = request.POST.get('latitude')
+        longitude = request.POST.get('longitude')
+
+        if image:
+            image_name = image.name
+            image_path = default_storage.save(f'images/{image_name}', image)
+            try:
+                with default_storage.open(image_path, 'rb') as img_file:
+                    tags = exifread.process_file(img_file)
+                    if 'GPSLatitude' in tags and 'GPSLongitude' in tags:
+                        latitude_exif = tags['GPSLatitude'].values
+                        longitude_exif = tags['GPSLongitude'].values
+                        lat = latitude_exif[0] + latitude_exif[1] / 60 + latitude_exif[2] / 3600
+                        lon = longitude_exif[0] + longitude_exif[1] / 60 + longitude_exif[2] / 3600
+                        if tags.get('GPSLatitudeRef') and tags['GPSLatitudeRef'].values == 'S':
+                            lat = -lat
+                        if tags.get('GPSLongitudeRef') and tags['GPSLongitudeRef'].values == 'W':
+                            lon = -lon
+                        latitude = lat
+                        longitude = lon
+            finally:
+                default_storage.delete(image_path)
+
+        if not latitude or not longitude:
+            return render(request, 'mapgame.html', {
+                'error': 'Please mark the location on the map',
+                'plants_data': Plant.objects.all(),
+                'user_profile': user_profile,
+                'profile': user_profile  # For backward compatibility
+            })
+
+        # Save plant to the database
+        plant = Plant.objects.create(
+            user=request.user,
+            latitude=latitude,
+            longitude=longitude,
+            plant_name=plant_name
+        )
+
+        # Add 10 points to the user's score
+        user_profile.add_score(10)
+
+        return redirect('mapgame')
+
+    # If GET request, fetch all plant data
+    plants = Plant.objects.all()
+    plants_data = [{
+        'lat': plant.latitude,
+        'lng': plant.longitude,
+        'plant_name': plant.plant_name,
+        'username': plant.user.username
+    } for plant in plants]
+
+    # Create discovery messages
+    messages = [f'New plant "{plant.plant_name}" discovered by {plant.user.username}!' for plant in plants]
+
+    return render(request, 'mapgame.html', {
+        'plants_data': plants_data,
+        'user_profile': user_profile,
+        'profile': user_profile,  # For backward compatibility
+        'messages': messages
+    })
+
+    
 @login_required(login_url='signin')
 def upload(request):
 
@@ -113,26 +354,7 @@ def search(request):
         username_profile_list = list(chain(*username_profile_list))
     return render(request, 'search.html', {'user_profile': user_profile, 'username_profile_list': username_profile_list})
 
-@login_required(login_url='signin')
-def like_post(request):
-    username = request.user.username
-    post_id = request.GET.get('post_id')
 
-    post = Post.objects.get(id=post_id)
-
-    like_filter = LikePost.objects.filter(post_id=post_id, username=username).first()
-
-    if like_filter == None:
-        new_like = LikePost.objects.create(post_id=post_id, username=username)
-        new_like.save()
-        post.no_of_likes = post.no_of_likes+1
-        post.save()
-        return redirect('/')
-    else:
-        like_filter.delete()
-        post.no_of_likes = post.no_of_likes-1
-        post.save()
-        return redirect('/')
 
 @login_required(login_url='signin')
 def profile(request, pk):
@@ -163,22 +385,7 @@ def profile(request, pk):
     }
     return render(request, 'profile.html', context)
 
-@login_required(login_url='signin')
-def follow(request):
-    if request.method == 'POST':
-        follower = request.POST['follower']
-        user = request.POST['user']
 
-        if FollowersCount.objects.filter(follower=follower, user=user).first():
-            delete_follower = FollowersCount.objects.get(follower=follower, user=user)
-            delete_follower.delete()
-            return redirect('/profile/'+user)
-        else:
-            new_follower = FollowersCount.objects.create(follower=follower, user=user)
-            new_follower.save()
-            return redirect('/profile/'+user)
-    else:
-        return redirect('/')
 
 @login_required(login_url='signin')
 def settings(request):
@@ -260,6 +467,7 @@ def signin(request):
 
     else:
         return render(request, 'signin.html')
+
 
 @login_required(login_url='signin')
 def logout(request):

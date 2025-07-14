@@ -1,0 +1,422 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="{% static 'assets/images/fav2.png' %}" rel="icon" type="image/png">
+    <title>Herbal Hub - Map Search</title>
+    <link rel="stylesheet" href="{% static 'assets/css/icons.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/uikit.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/tailwind.css' %}">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #04a84e, #033a3b);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-container {
+            display: flex;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .header-logo {
+            font-size: 24px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            margin-right: auto;
+        }
+
+        .header-logo img {
+            width: 95px;
+            height: auto;
+            margin-right: 10px;
+        }
+
+        .header-nav {
+            display: flex;
+            gap: 15px;
+        }
+
+        .header-nav a {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+        }
+
+        .header-nav a img {
+            width: 45px;
+        }
+
+        .header-nav a:hover {
+            color: #32ff7e;
+            text-decoration: underline;
+        }
+
+        .header-user-info {
+            display: flex;
+            align-items: center;
+            color: white;
+            margin-left: auto;
+        }
+
+        .header-user-info .badge {
+            background: #32ff7e;
+            padding: 5px 10px;
+            border-radius: 10px;
+            margin-left: 10px;
+            font-size: 16px;
+        }
+
+        #search-container {
+            display: flex;
+            flex-direction: column;
+            width: 300px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 10px;
+            box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.5);
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            margin-top: 100px;
+        }
+
+        .username {
+            color: #2dd881;
+            text-transform: uppercase;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .score {
+            border: 2px solid #e9b304;
+            border-radius: 20%;
+            padding: 5px 15px;
+            color: #21e99c;
+            font-weight: bold;
+        }
+
+        .badge-container {
+            position: absolute;
+            top: 80px; /* Adjust based on your header's height */
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .badge-img {
+            border: 3px solid;
+            border-radius: 50%;
+            width: 80px; /* Adjust size as needed */
+            height: 80px; /* Adjust size as needed */
+        }
+
+        .search-input-container {
+            margin-bottom: 10px;
+        }
+
+        .search-input-container label {
+            display: block;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .search-input-container input {
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            width: 100%;
+        }
+
+        #search-button {
+            padding: 10px 20px;
+            background-color: #32ff7e;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            color: black;
+            font-size: 16px;
+            margin-top: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        #search-button:hover {
+            background-color: #2dd881;
+        }
+
+        #show-all-button {
+            padding: 10px 20px;
+            background-color: #ff5733;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            color: black;
+            font-size: 16px;
+            margin-top: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        #show-all-button:hover {
+            background-color: #e94e2d;
+        }
+
+        #map-container {
+            position: relative;
+            width: 100%;
+            height: 550px;
+            margin: 20px auto;
+            max-width: 1200px;
+            background-color: #f7f7f7;
+            border-radius: 10px;
+            box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.5);
+            border: 5px solid #32ff7e;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        @media (max-width: 768px) {
+            #search-container {
+                width: 95%;
+            }
+
+            #map-container {
+                width: 95%;
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="header-container">
+            <div class="header-logo">
+                <img src="{% static 'assets/images/herbalLogo.png' %}" alt="Herbal Hub Logo">
+            </div>
+            <nav class="header-nav">
+                <a href="/" title="Home"><img src="{% static 'images/home123.png' %}" alt="Home"></a>
+                <a href="/mapmain" title="Game"><img src="{% static 'images/console123.png' %}" alt="Game"></a>
+                <a href="/scoreboard" title="Game"><i class="fas fa-game"><img src="{% static 'images/score.png' %}" style="width: 43px;" alt="Game"></i></a>
+            </nav>
+            <div class="header-user-info">
+                <span class="username"> {{ user.username }}</span>
+                <span class="score"> SCORE : {{ profile.score }}</span>
+            </div>
+        </div>
+    </header>
+    
+      <!-- Badge Container -->
+      <div class="badge-container">
+        {% if profile.badge == "Gold" %}
+        <img src="{% static 'assets/images/goldBadge.png' %}" alt="Gold Badge" class="badge-img" style="border-color: #f0d800;">
+        {% elif profile.badge == "Silver" %}
+        <img src="{% static 'assets/images/silverBadge.png' %}" alt="Silver Badge" class="badge-img" style="border-color: #a7a7a7;">
+        {% elif profile.badge == "Bronze" %}
+        <img src="{% static 'assets/images/bronzeBadge.png' %}" alt="Bronze Badge" class="badge-img" style="border-color: #cd7f32;">
+        {% elif profile.badge == "Legend" %}
+        <img src="{% static 'assets/images/ultimate1.png' %}" alt="Legend Badge" class="badge-img" style="border-color: #ae69fd;">
+        {% endif %}
+    </div>
+
+    <!-- Search Container -->
+    <div id="search-container" style="margin-left: 100px;">
+        <div class="search-input-container">
+            <label for="latitude-input">Latitude:</label>
+            <input type="text" id="latitude-input" placeholder="Latitude">
+        </div>
+        <div class="search-input-container">
+            <label for="longitude-input">Longitude:</label>
+            <input type="text" id="longitude-input" placeholder="Longitude">
+        </div>
+        <div class="search-input-container">
+            <label for="username-input">Username:</label>
+            <input type="text" id="username-input" placeholder="Username">
+        </div>
+        <div class="search-input-container">
+            <label for="plantname-input">Plant Name:</label>
+            <input type="text" id="plantname-input" placeholder="Plant Name">
+        </div>
+        <button id="search-button">Search</button>
+        <button id="show-all-button">Show All</button>
+    </div>
+
+
+
+    <!-- Map Container -->
+    <div id="map-container" style="width: 900px; margin-left: 500px;">
+        <div id="map" ></div>
+    </div>
+
+    
+
+    <!-- Scripts -->
+    <script src="{% static 'assets/js/jquery-3.3.1.min.js' %}"></script>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+    <script>
+        var map = L.map('map').setView([7.8731, 80.7718], 7);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        var greenIcon = L.icon({
+            iconUrl: '{% static 'assets/images/plantpin.png' %}',
+            iconSize: [32, 32],
+            iconAnchor: [16, 32],
+            popupAnchor: [0, -32]
+        });
+
+        var redIcon = L.icon({
+            iconUrl: '{% static 'assets/images/plantpin.png' %}',
+            iconSize: [32, 32],
+            iconAnchor: [16, 32],
+            popupAnchor: [0, -32]
+        });
+
+        var markersData = [
+            {% for plant_data in plants_data %}
+                {
+                    "latlng": [{{ plant_data.lat }}, {{ plant_data.lng }}],
+                    "name": "{{ plant_data.plant_name }}",
+                    "username": "{{ plant_data.username }}"
+                },
+            {% endfor %}
+        ];
+
+        function addMarkers(data, icon) {
+            data.forEach(function(plant) {
+                L.marker(plant.latlng, {icon: icon})
+                    .bindPopup(`
+                        <div>
+                            <h3>Plant Name: ${plant.name}</h3>
+                            <p>Username: ${plant.username}</p>
+                        </div>
+                    `)
+                    .addTo(map);
+            });
+        }
+
+        function filterMarkers() {
+            var latitude = parseFloat(document.getElementById('latitude-input').value.trim());
+            var longitude = parseFloat(document.getElementById('longitude-input').value.trim());
+            var username = document.getElementById('username-input').value.trim().toLowerCase();
+            var plantName = document.getElementById('plantname-input').value.trim().toLowerCase();
+            var filteredData = [];
+
+            if (isNaN(latitude) || isNaN(longitude)) {
+                // Show all markers if latitude or longitude is not a number
+                filteredData = markersData.filter(function(data) {
+                    return (username === "" || data.username.toLowerCase().includes(username)) &&
+                           (plantName === "" || data.name.toLowerCase().includes(plantName));
+                });
+            } else {
+                // Filter by radius and other parameters
+                filteredData = markersData.filter(function(data) {
+                    var distance = geodesic([latitude, longitude], data.latlng).km;
+                    return distance <= 50 &&
+                        (username === "" || data.username.toLowerCase().includes(username)) &&
+                        (plantName === "" || data.name.toLowerCase().includes(plantName));
+                });
+            }
+
+            // Clear existing markers
+            map.eachLayer(function (layer) {
+                if (layer instanceof L.Marker) {
+                    map.removeLayer(layer);
+                }
+            });
+
+            // Add new filtered markers
+            if (filteredData.length > 0) {
+                addMarkers(filteredData, greenIcon);
+            } else {
+                // If no markers are found, show a placeholder marker to indicate no results
+                if (!isNaN(latitude) && !isNaN(longitude)) {
+                    L.marker([latitude, longitude], {icon: redIcon})
+                        .bindPopup('<div><h3>No results found within 50 km.</h3></div>')
+                        .addTo(map);
+                }
+            }
+        }
+
+        function showAllMarkers() {
+            // Clear existing markers
+            map.eachLayer(function (layer) {
+                if (layer instanceof L.Marker) {
+                    map.removeLayer(layer);
+                }
+            });
+
+            // Add all markers
+            addMarkers(markersData, greenIcon);
+        }
+
+        document.getElementById('search-button').addEventListener('click', filterMarkers);
+        document.getElementById('show-all-button').addEventListener('click', showAllMarkers);
+
+        document.getElementById('latitude-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                filterMarkers();
+            }
+        });
+
+        document.getElementById('longitude-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                filterMarkers();
+            }
+        });
+
+        document.getElementById('username-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                filterMarkers();
+            }
+        });
+
+        document.getElementById('plantname-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                filterMarkers();
+            }
+        });
+
+        // Define geodesic function if it's not already available
+        function geodesic(coords1, coords2) {
+            return L.latLng(coords1).distanceTo(L.latLng(coords2));
+        }
+    </script>
+</body>
+</html>
