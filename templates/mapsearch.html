@@ -5,201 +5,158 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="{% static 'assets/images/fav2.png' %}" rel="icon" type="image/png">
-    <title>Herbal Hub - Map Search</title>
-    <link rel="stylesheet" href="{% static 'assets/css/icons.css' %}">
-    <link rel="stylesheet" href="{% static 'assets/css/uikit.css' %}">
-    <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
-    <link rel="stylesheet" href="{% static 'assets/css/tailwind.css' %}">
+    <title>Herbal Hub - Plant Explorer</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Montserrat:wght@800&display=swap" rel="stylesheet">
     <style>
-        body {
+        :root {
+            --primary: #04a84e;
+            --primary-dark: #033a3b;
+            --accent: #32ff7e;
+            --dark: #121212;
+            --light: #ffffff;
+            --card-bg: rgba(18, 18, 18, 0.7);
+            --glass: rgba(255, 255, 255, 0.05);
+            --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            --gold: #ffd700;
+            --silver: #c0c0c0;
+            --bronze: #cd7f32;
+            --legend: #ae69fd;
+        }
+
+        * {
             margin: 0;
-            font-family: 'Roboto', sans-serif;
-            background: linear-gradient(135deg, #04a84e, #033a3b);
-            color: white;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+            color: var(--light);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Main Game Container */
+        .game-container {
             display: flex;
             flex-direction: column;
             min-height: 100vh;
+            padding: 6rem 5% 2rem;
         }
 
-        header {
-            background: rgba(0, 0, 0, 0.5);
-            padding: 10px 20px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
+        /* Search Section */
+        .search-section {
             display: flex;
-            align-items: center;
-            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 2rem;
+            margin-bottom: 2rem;
         }
 
-        .header-container {
-            display: flex;
-            align-items: center;
-            max-width: 1200px;
-            margin: 0 auto;
-            width: 100%;
+        .search-form {
+            flex: 1;
+            min-width: 300px;
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(50, 255, 126, 0.2);
         }
 
-        .header-logo {
-            font-size: 24px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            margin-right: auto;
+        .form-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--accent);
+            text-align: center;
+            font-weight: 600;
         }
 
-        .header-logo img {
-            width: 95px;
-            height: auto;
-            margin-right: 10px;
+        .form-group {
+            margin-bottom: 1.5rem;
         }
 
-        .header-nav {
-            display: flex;
-            gap: 15px;
-        }
-
-        .header-nav a {
-            color: white;
-            text-decoration: none;
-            font-size: 18px;
-            display: flex;
-            align-items: center;
-        }
-
-        .header-nav a img {
-            width: 45px;
-        }
-
-        .header-nav a:hover {
-            color: #32ff7e;
-            text-decoration: underline;
-        }
-
-        .header-user-info {
-            display: flex;
-            align-items: center;
-            color: white;
-            margin-left: auto;
-        }
-
-        .header-user-info .badge {
-            background: #32ff7e;
-            padding: 5px 10px;
-            border-radius: 10px;
-            margin-left: 10px;
-            font-size: 16px;
-        }
-
-        #search-container {
-            display: flex;
-            flex-direction: column;
-            width: 300px;
-            padding: 20px;
-            background: rgba(0, 0, 0, 0.8);
-            border-radius: 10px;
-            box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.5);
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            z-index: 1000;
-            margin-top: 100px;
-        }
-
-        .username {
-            color: #2dd881;
-            text-transform: uppercase;
-            font-weight: bold;
-            margin-right: 10px;
-        }
-
-        .score {
-            border: 2px solid #e9b304;
-            border-radius: 20%;
-            padding: 5px 15px;
-            color: #21e99c;
-            font-weight: bold;
-        }
-
-        .badge-container {
-            position: absolute;
-            top: 80px; /* Adjust based on your header's height */
-            right: 20px;
-            z-index: 1000;
-        }
-
-        .badge-img {
-            border: 3px solid;
-            border-radius: 50%;
-            width: 80px; /* Adjust size as needed */
-            height: 80px; /* Adjust size as needed */
-        }
-
-        .search-input-container {
-            margin-bottom: 10px;
-        }
-
-        .search-input-container label {
+        .form-label {
             display: block;
-            font-size: 14px;
-            margin-bottom: 5px;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
         }
 
-        .search-input-container input {
-            padding: 10px;
-            border-radius: 5px;
-            border: none;
+        .form-input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: var(--light);
+            font-family: inherit;
+            transition: var(--transition);
+        }
+
+        .form-input:focus {
             outline: none;
-            font-size: 16px;
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            width: 100%;
+            border-color: var(--accent);
+            background: rgba(50, 255, 126, 0.1);
         }
 
-        #search-button {
-            padding: 10px 20px;
-            background-color: #32ff7e;
-            border: none;
-            border-radius: 5px;
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: var(--transition);
             cursor: pointer;
-            color: black;
-            font-size: 16px;
-            margin-top: 10px;
-            transition: background-color 0.3s ease;
-        }
-
-        #search-button:hover {
-            background-color: #2dd881;
-        }
-
-        #show-all-button {
-            padding: 10px 20px;
-            background-color: #ff5733;
             border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            color: black;
-            font-size: 16px;
-            margin-top: 10px;
-            transition: background-color 0.3s ease;
+            flex: 1;
         }
 
-        #show-all-button:hover {
-            background-color: #e94e2d;
+        .btn-primary {
+            background: var(--accent);
+            color: var(--dark);
         }
 
-        #map-container {
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(50, 255, 126, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--light);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(50, 255, 126, 0.1);
+            color: var(--accent);
+            border-color: var(--accent);
+            transform: translateY(-3px);
+        }
+
+        /* Map Container */
+        .map-container {
+            flex: 2;
+            min-width: 300px;
+            height: 500px;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border: 2px solid var(--accent);
             position: relative;
-            width: 100%;
-            height: 550px;
-            margin: 20px auto;
-            max-width: 1200px;
-            background-color: #f7f7f7;
-            border-radius: 10px;
-            box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.5);
-            border: 5px solid #32ff7e;
         }
 
         #map {
@@ -207,216 +164,313 @@
             height: 100%;
         }
 
-        @media (max-width: 768px) {
-            #search-container {
-                width: 95%;
-            }
+        /* Results Section */
+        .results-container {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(50, 255, 126, 0.2);
+            margin-top: 2rem;
+        }
 
-            #map-container {
-                width: 95%;
+        .results-title {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .results-title i {
+            font-size: 1.2rem;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .plant-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 1rem;
+            border-left: 3px solid var(--accent);
+            transition: var(--transition);
+        }
+
+        .plant-card:hover {
+            transform: translateY(-5px);
+            background: rgba(50, 255, 126, 0.1);
+        }
+
+        .plant-name {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--accent);
+        }
+
+        .plant-detail {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 0.3rem;
+        }
+
+    
+        @keyframes glow {
+            from {
+                box-shadow: 0 0 10px rgba(174, 105, 253, 0.5);
+            }
+            to {
+                box-shadow: 0 0 20px rgba(174, 105, 253, 0.8);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .search-section {
+                flex-direction: column;
+            }
+            
+            .map-container, .search-form {
+                flex: none;
+                width: 100%;
+            }
+            
+            
+        }
+
+        @media (max-width: 768px) {
+            .game-container {
+                padding: 5rem 1rem 1rem;
+            }
+            
+            .map-container {
                 height: 400px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .search-form, .results-container {
+                padding: 1rem;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
             }
         }
     </style>
 </head>
 <body>
-
-    <!-- Header -->
-    <header>
-        <div class="header-container">
-            <div class="header-logo">
-                <img src="{% static 'assets/images/herbalLogo.png' %}" alt="Herbal Hub Logo">
-            </div>
-            <nav class="header-nav">
-                <a href="/" title="Home"><img src="{% static 'images/home123.png' %}" alt="Home"></a>
-                <a href="/mapmain" title="Game"><img src="{% static 'images/console123.png' %}" alt="Game"></a>
-                <a href="/scoreboard" title="Game"><i class="fas fa-game"><img src="{% static 'images/score.png' %}" style="width: 43px;" alt="Game"></i></a>
-            </nav>
-            <div class="header-user-info">
-                <span class="username"> {{ user.username }}</span>
-                <span class="score"> SCORE : {{ profile.score }}</span>
-            </div>
-        </div>
-    </header>
     
-      <!-- Badge Container -->
-      <div class="badge-container">
-        {% if profile.badge == "Gold" %}
-        <img src="{% static 'assets/images/goldBadge.png' %}" alt="Gold Badge" class="badge-img" style="border-color: #f0d800;">
-        {% elif profile.badge == "Silver" %}
-        <img src="{% static 'assets/images/silverBadge.png' %}" alt="Silver Badge" class="badge-img" style="border-color: #a7a7a7;">
-        {% elif profile.badge == "Bronze" %}
-        <img src="{% static 'assets/images/bronzeBadge.png' %}" alt="Bronze Badge" class="badge-img" style="border-color: #cd7f32;">
-        {% elif profile.badge == "Legend" %}
-        <img src="{% static 'assets/images/ultimate1.png' %}" alt="Legend Badge" class="badge-img" style="border-color: #ae69fd;">
-        {% endif %}
+    {% include 'header.html' %}
+
+    <!-- Main Game Container -->
+    <div class="game-container">
+        <div class="search-section">
+            <!-- Search Form -->
+            <form class="search-form" id="searchForm">
+                <h2 class="form-title">
+                    <i class="fas fa-search"></i> Plant Search
+                </h2>
+                
+                <div class="form-group">
+                    <label for="latitude" class="form-label">Latitude</label>
+                    <input type="text" id="latitude" name="latitude" class="form-input" placeholder="Enter latitude">
+                </div>
+                
+                <div class="form-group">
+                    <label for="longitude" class="form-label">Longitude</label>
+                    <input type="text" id="longitude" name="longitude" class="form-input" placeholder="Enter longitude">
+                </div>
+                
+                <div class="form-group">
+                    <label for="username" class="form-label">Username</label>
+                    <input type="text" id="username" name="username" class="form-input" placeholder="Filter by username">
+                </div>
+                
+                <div class="form-group">
+                    <label for="plantname" class="form-label">Plant Name</label>
+                    <input type="text" id="plantname" name="plantname" class="form-input" placeholder="Filter by plant name">
+                </div>
+                
+                <div class="action-buttons">
+                    <button type="button" id="searchBtn" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                    <button type="button" id="showAllBtn" class="btn btn-secondary">
+                        <i class="fas fa-list"></i> Show All
+                    </button>
+                </div>
+            </form>
+
+            <!-- Map Container -->
+            <div class="map-container">
+                <div id="map"></div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div class="results-container">
+            <h3 class="results-title">
+                <i class="fas fa-seedling"></i> Search Results
+            </h3>
+            <div class="results-grid" id="resultsGrid">
+                {% for plant in plants_data %}
+                <div class="plant-card">
+                    <div class="plant-name">{{ plant.plant_name }}</div>
+                    <div class="plant-detail"><i class="fas fa-user"></i> {{ plant.username }}</div>
+                    <div class="plant-detail"><i class="fas fa-map-marker-alt"></i> {{ plant.lat|floatformat:4 }}, {{ plant.lng|floatformat:4 }}</div>
+                    {% if plant.distance %}
+                    <div class="plant-detail"><i class="fas fa-ruler-combined"></i> {{ plant.distance|floatformat:2 }} km away</div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
     </div>
 
-    <!-- Search Container -->
-    <div id="search-container" style="margin-left: 100px;">
-        <div class="search-input-container">
-            <label for="latitude-input">Latitude:</label>
-            <input type="text" id="latitude-input" placeholder="Latitude">
-        </div>
-        <div class="search-input-container">
-            <label for="longitude-input">Longitude:</label>
-            <input type="text" id="longitude-input" placeholder="Longitude">
-        </div>
-        <div class="search-input-container">
-            <label for="username-input">Username:</label>
-            <input type="text" id="username-input" placeholder="Username">
-        </div>
-        <div class="search-input-container">
-            <label for="plantname-input">Plant Name:</label>
-            <input type="text" id="plantname-input" placeholder="Plant Name">
-        </div>
-        <button id="search-button">Search</button>
-        <button id="show-all-button">Show All</button>
-    </div>
-
-
-
-    <!-- Map Container -->
-    <div id="map-container" style="width: 900px; margin-left: 500px;">
-        <div id="map" ></div>
-    </div>
-
-    
-
-    <!-- Scripts -->
-    <script src="{% static 'assets/js/jquery-3.3.1.min.js' %}"></script>
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
     <script>
+        // Initialize map with Sri Lanka centered
         var map = L.map('map').setView([7.8731, 80.7718], 7);
-
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            attribution: '&copy; OpenStreetMap contributors'
         }).addTo(map);
 
-        var greenIcon = L.icon({
+        // Custom icons
+        var plantIcon = L.icon({
             iconUrl: '{% static 'assets/images/plantpin.png' %}',
             iconSize: [32, 32],
             iconAnchor: [16, 32],
             popupAnchor: [0, -32]
         });
 
-        var redIcon = L.icon({
-            iconUrl: '{% static 'assets/images/plantpin.png' %}',
-            iconSize: [32, 32],
-            iconAnchor: [16, 32],
-            popupAnchor: [0, -32]
+        var highlightIcon = L.icon({
+            iconUrl: '{% static 'assets/images/plantpin_highlight.png' %}',
+            iconSize: [40, 40],
+            iconAnchor: [20, 40],
+            popupAnchor: [0, -40]
         });
 
-        var markersData = [
-            {% for plant_data in plants_data %}
-                {
-                    "latlng": [{{ plant_data.lat }}, {{ plant_data.lng }}],
-                    "name": "{{ plant_data.plant_name }}",
-                    "username": "{{ plant_data.username }}"
-                },
-            {% endfor %}
-        ];
+        // Plant data from Django template
+        var plantsData = {{ plants_data|safe }};
+        var markers = [];
 
-        function addMarkers(data, icon) {
+        // Function to add markers to map
+        function addMarkers(data, highlight = false) {
+            // Clear existing markers
+            markers.forEach(marker => map.removeLayer(marker));
+            markers = [];
+            
+            // Clear results grid
+            document.getElementById('resultsGrid').innerHTML = '';
+            
+            if (data.length === 0) {
+                // Show message if no results
+                document.getElementById('resultsGrid').innerHTML = 
+                    '<div class="plant-card" style="grid-column: 1/-1; text-align: center;">No plants found matching your criteria</div>';
+                return;
+            }
+
+            // Add new markers and results
             data.forEach(function(plant) {
-                L.marker(plant.latlng, {icon: icon})
-                    .bindPopup(`
-                        <div>
-                            <h3>Plant Name: ${plant.name}</h3>
-                            <p>Username: ${plant.username}</p>
-                        </div>
-                    `)
-                    .addTo(map);
+                // Add marker to map
+                var marker = L.marker([plant.lat, plant.lng], {
+                    icon: highlight ? highlightIcon : plantIcon
+                }).addTo(map);
+                
+                marker.bindPopup(`
+                    <b>${plant.plant_name}</b><br>
+                    <small>Discovered by: ${plant.username}</small>
+                    <div style="margin-top: 5px;">
+                        <i class="fas fa-map-marker-alt" style="color: #32ff7e;"></i> 
+                        ${plant.lat.toFixed(4)}, ${plant.lng.toFixed(4)}
+                        ${plant.distance ? '<br><i class="fas fa-ruler-combined"></i> ' + plant.distance.toFixed(2) + ' km away' : ''}
+                    </div>
+                `);
+                
+                markers.push(marker);
+                
+                // Add to results grid
+                var card = document.createElement('div');
+                card.className = 'plant-card';
+                card.innerHTML = `
+                    <div class="plant-name">${plant.plant_name}</div>
+                    <div class="plant-detail"><i class="fas fa-user"></i> ${plant.username}</div>
+                    <div class="plant-detail"><i class="fas fa-map-marker-alt"></i> ${plant.lat.toFixed(4)}, ${plant.lng.toFixed(4)}</div>
+                    ${plant.distance ? `<div class="plant-detail"><i class="fas fa-ruler-combined"></i> ${plant.distance.toFixed(2)} km away</div>` : ''}
+                `;
+                
+                // Highlight card when marker is clicked
+                card.addEventListener('click', function() {
+                    map.setView([plant.lat, plant.lng], 15);
+                    marker.openPopup();
+                });
+                
+                document.getElementById('resultsGrid').appendChild(card);
             });
+
+            // Fit map to bounds of all markers
+            if (data.length > 0) {
+                var group = new L.featureGroup(markers);
+                map.fitBounds(group.getBounds().pad(0.2));
+            }
         }
 
-        function filterMarkers() {
-            var latitude = parseFloat(document.getElementById('latitude-input').value.trim());
-            var longitude = parseFloat(document.getElementById('longitude-input').value.trim());
-            var username = document.getElementById('username-input').value.trim().toLowerCase();
-            var plantName = document.getElementById('plantname-input').value.trim().toLowerCase();
-            var filteredData = [];
+        // Initial load - show all plants
+        addMarkers(plantsData);
 
-            if (isNaN(latitude) || isNaN(longitude)) {
-                // Show all markers if latitude or longitude is not a number
-                filteredData = markersData.filter(function(data) {
-                    return (username === "" || data.username.toLowerCase().includes(username)) &&
-                           (plantName === "" || data.name.toLowerCase().includes(plantName));
-                });
-            } else {
-                // Filter by radius and other parameters
-                filteredData = markersData.filter(function(data) {
-                    var distance = geodesic([latitude, longitude], data.latlng).km;
-                    return distance <= 50 &&
-                        (username === "" || data.username.toLowerCase().includes(username)) &&
-                        (plantName === "" || data.name.toLowerCase().includes(plantName));
-                });
-            }
-
-            // Clear existing markers
-            map.eachLayer(function (layer) {
-                if (layer instanceof L.Marker) {
-                    map.removeLayer(layer);
-                }
-            });
-
-            // Add new filtered markers
-            if (filteredData.length > 0) {
-                addMarkers(filteredData, greenIcon);
-            } else {
-                // If no markers are found, show a placeholder marker to indicate no results
+        // Search function
+        document.getElementById('searchBtn').addEventListener('click', function() {
+            var latitude = parseFloat(document.getElementById('latitude').value);
+            var longitude = parseFloat(document.getElementById('longitude').value);
+            var username = document.getElementById('username').value.toLowerCase();
+            var plantname = document.getElementById('plantname').value.toLowerCase();
+            
+            var filteredData = plantsData.filter(function(plant) {
+                // Filter by username and plantname
+                var userMatch = username === '' || plant.username.toLowerCase().includes(username);
+                var plantMatch = plantname === '' || plant.plant_name.toLowerCase().includes(plantname);
+                
+                // Filter by location if coordinates are provided
                 if (!isNaN(latitude) && !isNaN(longitude)) {
-                    L.marker([latitude, longitude], {icon: redIcon})
-                        .bindPopup('<div><h3>No results found within 50 km.</h3></div>')
-                        .addTo(map);
+                    // Calculate distance (simplified - in production use proper geodesic calculation)
+                    plant.distance = Math.sqrt(
+                        Math.pow(plant.lat - latitude, 2) + 
+                        Math.pow(plant.lng - longitude, 2)
+                    ) * 111; // Approximate km per degree
+                    
+                    return userMatch && plantMatch && plant.distance <= 50;
                 }
-            }
-        }
+                
+                return userMatch && plantMatch;
+            });
+            
+            addMarkers(filteredData, true);
+        });
 
-        function showAllMarkers() {
-            // Clear existing markers
-            map.eachLayer(function (layer) {
-                if (layer instanceof L.Marker) {
-                    map.removeLayer(layer);
+        // Show all plants
+        document.getElementById('showAllBtn').addEventListener('click', function() {
+            // Reset form
+            document.getElementById('searchForm').reset();
+            
+            // Show all plants without distance
+            plantsData.forEach(plant => delete plant.distance);
+            addMarkers(plantsData);
+        });
+
+        // Handle Enter key in search fields
+        document.querySelectorAll('.form-input').forEach(input => {
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    document.getElementById('searchBtn').click();
                 }
             });
-
-            // Add all markers
-            addMarkers(markersData, greenIcon);
-        }
-
-        document.getElementById('search-button').addEventListener('click', filterMarkers);
-        document.getElementById('show-all-button').addEventListener('click', showAllMarkers);
-
-        document.getElementById('latitude-input').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                filterMarkers();
-            }
         });
-
-        document.getElementById('longitude-input').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                filterMarkers();
-            }
-        });
-
-        document.getElementById('username-input').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                filterMarkers();
-            }
-        });
-
-        document.getElementById('plantname-input').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                filterMarkers();
-            }
-        });
-
-        // Define geodesic function if it's not already available
-        function geodesic(coords1, coords2) {
-            return L.latLng(coords1).distanceTo(L.latLng(coords2));
-        }
     </script>
 </body>
 </html>

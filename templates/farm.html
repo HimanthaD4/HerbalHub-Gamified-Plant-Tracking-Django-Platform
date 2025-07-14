@@ -25,64 +25,14 @@
             flex-direction: column;
             min-height: 100vh;
         }
-        header {
-            background: rgba(0, 0, 0, 0.5);
-            padding: 10px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+      
+
+        .divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 0.5rem 0;
         }
-        .header-logo img {
-            width: 95px;
-            height: auto;
-        }
-        .header-nav {
-            display: flex;
-            gap: 50px;
-            justify-content: center;
-            flex-grow: 1;
-        }
-        .header-nav a {
-            color: white;
-            text-decoration: none;
-            font-size: 18px;
-            display: flex;
-            align-items: center;
-        }
-        .header-nav a img {
-            width: 45px;
-        }
-        .header-nav a:hover {
-            color: #32ff7e;
-            text-decoration: underline;
-        }
-        .profile-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        .username {
-            color: #2dd881;
-            text-transform: uppercase;
-            font-weight: bold;
-        }
-        .money {
-            border: 2px solid #e9b304;
-            border-radius: 20%;
-            padding: 5px 15px;
-            color: #21e99c;
-            font-weight: bold;
-        }
-        .badge-container {
-            width: 80px;
-            margin-left: 1300px;
-            margin-top: -78px;
-        }
-        .badge-img {
-            border: 3px solid;
-            border-radius: 50%;
-        }
+
         .garden-section {
             flex-grow: 1;
             display: flex;
@@ -93,9 +43,9 @@
             margin-top: -90px;
             width: 100%;
             background-image: url("{% static 'assets/images/gameback.jpg' %}");
-            background-size: contain; /* Ensures the image fits the box without cropping */
-            background-repeat: no-repeat; /* Prevents the image from repeating */
-            background-position: center; /* Centers the image in the section */
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center; 
 
         }
         .garden {
@@ -249,21 +199,8 @@
     </style>
 </head>
 <body>
-    <header>              
-        <div class="header-logo">
-            <img src="{% static 'assets/images/herbalLogo.png' %}" alt="Herbal Hub Logo">
-        </div>
-        <nav class="header-nav">
-            <a href="/" title="Home"><img src="{% static 'images/home123.png' %}" alt="Home"></a>
-            <a href="/mapmain" title="Game"><img src="{% static 'images/console123.png' %}" alt="Game"></a>
-            <a href="/scoreboard" title="Scoreboard"><img src="{% static 'images/score.png' %}" style="width: 43px;" alt="Scoreboard"></a>
-        </nav>
-        <div class="profile-info">
-            <img src="{% static 'assets/images/coin.png' %}" alt="Coin" style="width: 40px; height: 40px; vertical-align: middle;">
-            <p class="money">{{ profile.score }}</p>
-            <p class="username">{{ request.user.username }}</p>
-        </div>
-    </header>
+   {% include 'header.html' %}
+
 
     <div class="badge-container">
         <img class="badge-img" src="{% static 'icons/'|add:profile.badge|add:'.png' %}" alt="Badge">
