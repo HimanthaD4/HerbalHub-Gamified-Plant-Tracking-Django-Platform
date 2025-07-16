@@ -76,9 +76,6 @@
 <body>
    {% include 'header.html' %}
 
-    <div class="badge-container">
-        <img class="badge-img" src="{% static 'icons/'|add:profile.badge|add:'.png' %}" alt="Badge">
-    </div>
     <div class="garden-section">   
         <div id="garden" class="garden">
             {% for row in rows %}

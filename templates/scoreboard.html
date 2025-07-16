@@ -44,8 +44,8 @@
 
         /* Badge Display - Consistent with other pages */
         .badge-display {
-            position: absolute;
-            right: 5%;
+            position: fixed;
+            right: 2rem;
             top: 7rem;
             z-index: 100;
             display: flex;
@@ -55,8 +55,8 @@
         }
 
         .badge {
-            width: 4rem;
-            height: 4rem;
+            width: 5rem;
+            height: 5rem;
             border-radius: 50%;
             border: 3px solid;
             display: flex;
@@ -228,7 +228,6 @@
             background: rgba(50, 255, 126, 0.05);
         }
 
-       
         .badge-img {
             width: 2.5rem;
             height: 2.5rem;
@@ -275,40 +274,24 @@
             background: #2dd881;
         }
 
-        /* User Badge Display */
-        .user-badge-display {
-            position: fixed;
-            right: 5%;
-            top: 5rem;
-            z-index: 100;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.5rem;
+        /* Current User Highlight */
+        .current-user {
+            background: rgba(50, 255, 126, 0.1) !important;
+            position: relative;
         }
 
-        .user-badge {
-            width: 5rem;
-            height: 5rem;
-            border-radius: 50%;
-            border: 3px solid;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--card-bg);
-            backdrop-filter: blur(5px);
-            transition: var(--transition);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        .user-badge:hover {
-            transform: translateY(-5px) scale(1.1);
-        }
-
-        .user-badge img {
-            width: 80%;
-            height: 80%;
-            object-fit: contain;
+        .current-user::after {
+            content: '';
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--accent);
+            color: var(--dark);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: bold;
         }
 
         /* Responsive Design */
@@ -327,12 +310,14 @@
                 margin: 0 0.5rem;
             }
             
-            .user-badge-display {
+            .badge-display {
                 position: static;
                 flex-direction: row;
                 justify-content: center;
-                margin-bottom: 1.5rem;
+                margin: 1.5rem auto;
                 width: 100%;
+                right: auto;
+                top: auto;
             }
         }
 
@@ -353,6 +338,11 @@
             .view-button {
                 padding: 0.5rem 1rem;
                 font-size: 0.8rem;
+            }
+
+            .badge {
+                width: 4rem;
+                height: 4rem;
             }
         }
 
@@ -379,6 +369,11 @@
                 overflow-x: auto;
                 white-space: nowrap;
             }
+
+            .badge {
+                width: 3.5rem;
+                height: 3.5rem;
+            }
         }
     </style>
 </head>
@@ -386,20 +381,7 @@
     <!-- Include the header -->
     {% include 'header.html' %}
 
-    <!-- User Badge Display -->
-    <div class="user-badge-display">
-        <div class="user-badge {% if user_profile.badge == 'Gold' %}badge-gold{% elif user_profile.badge == 'Silver' %}badge-silver{% elif user_profile.badge == 'Bronze' %}badge-bronze{% elif user_profile.badge == 'Legend' %}badge-legend{% endif %}">
-            {% if user_profile.badge == "Gold" %}
-            <img src="{% static 'assets/images/goldBadge.png' %}" alt="Gold Badge">
-            {% elif user_profile.badge == "Silver" %}
-            <img src="{% static 'assets/images/silverBadge.png' %}" alt="Silver Badge">
-            {% elif user_profile.badge == "Bronze" %}
-            <img src="{% static 'assets/images/bronzeBadge.png' %}" alt="Bronze Badge">
-            {% elif user_profile.badge == "Legend" %}
-            <img src="{% static 'assets/images/ultimate1.png' %}" alt="Legend Badge">
-            {% endif %}
-        </div>
-    </div>
+  
 
     <!-- Main Scoreboard Container -->
     <div class="scoreboard-container">
@@ -409,17 +391,17 @@
                 <img src="{% static 'assets/images/bronzeBadge.png' %}" alt="Bronze Badge" style="border-color: var(--bronze);">
                 <span>Bronze</span>
             </div>
-            <div class="progress-bar" style="--progress: {% widthratio user_profile.score 300 100 %}%;"></div>
+            <div class="progress-bar" style="--progress: {% widthratio user_profile.score 800 100 %}%;"></div>
             <div class="badge-path-item">
                 <img src="{% static 'assets/images/silverBadge.png' %}" alt="Silver Badge" style="border-color: var(--silver);">
                 <span>Silver</span>
             </div>
-            <div class="progress-bar" style="--progress: {% widthratio user_profile.score 600 100 %}%;"></div>
+            <div class="progress-bar" style="--progress: {% widthratio user_profile.score 800 100 %}%;"></div>
             <div class="badge-path-item">
                 <img src="{% static 'assets/images/goldBadge.png' %}" alt="Gold Badge" style="border-color: var(--gold);">
                 <span>Gold</span>
             </div>
-            <div class="progress-bar" style="--progress: {% widthratio user_profile.score 1000 100 %}%;"></div>
+            <div class="progress-bar" style="--progress: {% widthratio user_profile.score 800 100 %}%;"></div>
             <div class="badge-path-item">
                 <img src="{% static 'assets/images/ultimate1.png' %}" alt="Legend Badge" style="border-color: var(--legend);">
                 <span>Legend</span>
@@ -439,21 +421,19 @@
             </thead>
             <tbody>
                 {% for profile in profiles %}
-                <tr class="{% if profile.user.username == request.user.username %}highlight{% endif %}">
+                <tr class="{% if profile.user.username == request.user.username %}current-user{% endif %}">
                     <td>{{ forloop.counter }}</td>
                     <td>{{ profile.user.username }}</td>
                     <td>{{ profile.score }}</td>
                     <td>
-                        {% if profile.badge == "Gold" %}
-                        <img src="{% static 'assets/images/goldBadge.png' %}" class="badge-img badge-img-gold" alt="Gold Badge">
-                        {% elif profile.badge == "Silver" %}
-                        <img src="{% static 'assets/images/silverBadge.png' %}" class="badge-img badge-img-silver" alt="Silver Badge">
-                        {% elif profile.badge == "Bronze" %}
-                        <img src="{% static 'assets/images/bronzeBadge.png' %}" class="badge-img badge-img-bronze" alt="Bronze Badge">
-                        {% elif profile.badge == "Legend" %}
-                        <img src="{% static 'assets/images/ultimate1.png' %}" class="badge-img badge-img-legend" alt="Legend Badge">
+                        {% if profile.score >= 800 %}
+                            <img src="{% static 'assets/images/ultimate1.png' %}" class="badge-img badge-img-legend" alt="Legend Badge">
+                        {% elif profile.score >= 600 %}
+                            <img src="{% static 'assets/images/goldBadge.png' %}" class="badge-img badge-img-gold" alt="Gold Badge">
+                        {% elif profile.score >= 400 %}
+                            <img src="{% static 'assets/images/silverBadge.png' %}" class="badge-img badge-img-silver" alt="Silver Badge">
                         {% else %}
-                        <img src="{% static 'assets/images/silverBadge.png' %}" class="badge-img" alt="No Badge">
+                            <img src="{% static 'assets/images/bronzeBadge.png' %}" class="badge-img badge-img-bronze" alt="Bronze Badge">
                         {% endif %}
                     </td>
                     <td>

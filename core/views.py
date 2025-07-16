@@ -3,13 +3,13 @@ from django.contrib.auth.models import User, auth
 from django.contrib import messages
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
-from .models import Profile,Plant, GardenBox
+from .models import Profile, Plant, GardenBox
 import exifread
 from itertools import chain
 import random
 import os
 from django.core.files.storage import default_storage
-from django.conf import settings  # Ensure this import is correct
+from django.conf import settings
 from django.core.files.base import ContentFile
 from django.db.models import Q
 from geopy.distance import geodesic
@@ -36,7 +36,6 @@ def save_garden(request):
             price_map = {
                 "Aloe": 10,
                 "Mint": 15,
-              
             }
             total_price += price_map.get(plant, 0)  
             
@@ -75,9 +74,7 @@ def viewgarden(request, user_id):
         'garden_boxes': garden_boxes,  
         'user_profile': user_profile,
         'profile': user_profile,
-        
     })
-
 
 
 @login_required(login_url='signin')
@@ -94,7 +91,7 @@ def index(request):
 
     return render(request, 'index.html', {
         'user_profile': user_profile,
-        'profile': user_profile,  # Added for header consistency
+        'profile': user_profile,
         'user_score': user_profile.score,
     })
 
@@ -103,7 +100,7 @@ def index(request):
 def map_game(request):
     user_object = User.objects.get(username=request.user.username)
     user_profile = Profile.objects.get(user=user_object)
-    profile = Profile.objects.get(user=request.user)  
+    profile = Profile.objects.get(user=request.user)
 
     if request.method == 'POST':
         plant_name = request.POST.get('plantName')
@@ -163,11 +160,9 @@ def map_game(request):
     return render(request, 'mapgame.html', {
         'plants_data': plants_data,
         'user_profile': user_profile,
-        'profile': user_profile,  
+        'profile': user_profile,
         'messages': messages
     })
-
-
 
 
 @login_required(login_url='signin')
@@ -185,27 +180,27 @@ def scoreboard(request):
     return render(request, 'scoreboard.html', {
         'profiles': profiles,
         'user_profile': user_profile,
-        'profile': user_profile,  # Add this line to match header template
+        'profile': user_profile,
         'user_score': user_profile.score,
-        'user_badge': user_profile.badge,
         'user_rank': user_rank,
         'plants_count': plants_count,
         'chart_data': chart_data
     })
 
+
 @login_required
 def farm(request):
     user_object = User.objects.get(username=request.user.username)
     user_profile = Profile.objects.get(user=user_object)
-    profile = Profile.objects.get(user=request.user)  # This is the same as user_profile
+    profile = Profile.objects.get(user=request.user)
     rows = list(range(1, 15))
     cols = list(range(1, 11))
     
     garden_boxes = GardenBox.objects.filter(user=request.user)
     
     return render(request, 'farm.html', {
-        'profile': profile,  # Already existed
-        'user_profile': user_profile,  # Added for consistency
+        'profile': profile,
+        'user_profile': user_profile,
         'rows': rows,
         'cols': cols,
         'garden_boxes': garden_boxes, 
@@ -220,7 +215,6 @@ def mapsearch(request):
     
     plants_data = []
     user_score = user_profile.score
-    user_badge = user_profile.badge
 
     if request.method == 'GET':
         search_username = request.GET.get('username', '')
@@ -266,7 +260,6 @@ def mapsearch(request):
         'user_profile': user_profile,
         'profile': user_profile,
         'user_score': user_score,
-        'user_badge': user_badge
     })
 
 
@@ -283,6 +276,7 @@ def upload(request):
         return redirect('/')
     else:
         return redirect('/')
+
 
 @login_required(login_url='signin')
 def search(request):
@@ -307,7 +301,6 @@ def search(request):
     return render(request, 'search.html', {'user_profile': user_profile, 'username_profile_list': username_profile_list})
 
 
-
 @login_required(login_url='signin')
 def profile(request, pk):
     user_object = User.objects.get(username=pk)
@@ -316,42 +309,11 @@ def profile(request, pk):
     context = {
         'user_object': user_object,
         'user_profile': user_profile,
-        'button_text': button_text,
     }
     return render(request, 'profile.html', context)
 
 
-
-@login_required(login_url='signin')
-def settings(request):
-    user_profile = Profile.objects.get(user=request.user)
-
-    if request.method == 'POST':
-        
-        if request.FILES.get('image') == None:
-            image = user_profile.profileimg
-            bio = request.POST['bio']
-            location = request.POST['location']
-
-            user_profile.profileimg = image
-            user_profile.bio = bio
-            user_profile.location = location
-            user_profile.save()
-        if request.FILES.get('image') != None:
-            image = request.FILES.get('image')
-            bio = request.POST['bio']
-            location = request.POST['location']
-
-            user_profile.profileimg = image
-            user_profile.bio = bio
-            user_profile.location = location
-            user_profile.save()
-        
-        return redirect('settings')
-    return render(request, 'setting.html', {'user_profile': user_profile})
-
 def signup(request):
-
     if request.method == 'POST':
         username = request.POST['username']
         email = request.POST['email']
@@ -383,8 +345,8 @@ def signup(request):
     else:
         return render(request, 'signup.html')
 
+
 def signin(request):
-    
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
@@ -400,7 +362,6 @@ def signin(request):
 
     else:
         return render(request, 'signin.html')
-
 
 
 @login_required(login_url='signin')
@@ -444,8 +405,8 @@ def settings(request):
                 login(request, request.user)
                 return redirect('settings')
             else:
-                # Handle password change error
-                pass
+                messages.error(request, 'Password change failed')
+                return redirect('settings')
 
         # Handle account deletion
         elif 'delete_account' in request.POST:
@@ -458,7 +419,7 @@ def settings(request):
     }
     return render(request, 'setting.html', context)
 
-    
+
 @login_required(login_url='signin')
 def logout(request):
     auth.logout(request)
