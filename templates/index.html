@@ -290,6 +290,65 @@
             cursor: pointer;
             font-size: 1rem;
         }
+         .score-badge-container {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                background: rgba(0, 0, 0, 0.3);
+                padding: 0.3rem 0.8rem;
+                border-radius: 50px;
+                border: 2px solid var(--accent);
+            }
+
+            .score-display {
+                font-weight: 700;
+                font-size: 1rem;
+            }
+
+            /* Mini Badge Styles */
+            .mini-badge {
+                width: 1.5rem;
+                height: 1.5rem;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border: 2px solid;
+                transition: var(--transition);
+            }
+
+            .mini-badge img {
+                width: 80%;
+                height: 80%;
+                object-fit: contain;
+            }
+
+            .badge-bronze {
+                border-color: var(--bronze);
+                background: rgba(205, 127, 50, 0.2);
+            }
+
+            .badge-silver {
+                border-color: var(--silver);
+                background: rgba(192, 192, 192, 0.2);
+            }
+
+            .badge-gold {
+                border-color: var(--gold);
+                background: rgba(255, 215, 0, 0.2);
+            }
+
+            .badge-legend {
+                border-color: var(--legend);
+                background: rgba(174, 105, 253, 0.2);
+                animation: pulse 2s infinite;
+            }
+
+            @keyframes pulse {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.1); }
+                100% { transform: scale(1); }
+            }
 
         .btn-primary {
             background: var(--accent);
@@ -442,6 +501,7 @@
             .hero-title {
                 font-size: 2.2rem;
             }
+           
         }
     </style>
 </head>
@@ -468,6 +528,24 @@
             </a>
 
             <div class="profile">
+                <div class="score-badge-container">
+                <span class="score-display">{{ profile.score }} PTS</span>
+                <div class="mini-badge 
+                    {% if profile.score >= 800 %}badge-legend
+                    {% elif profile.score >= 600 %}badge-gold
+                    {% elif profile.score >= 400 %}badge-silver
+                    {% else %}badge-bronze{% endif %}">
+                    {% if profile.score >= 800 %}
+                        <img src="{% static 'assets/images/ultimate1.png' %}" alt="Legend">
+                    {% elif profile.score >= 600 %}
+                        <img src="{% static 'assets/images/goldBadge.png' %}" alt="Gold">
+                    {% elif profile.score >= 400 %}
+                        <img src="{% static 'assets/images/silverBadge.png' %}" alt="Silver">
+                    {% else %}
+                        <img src="{% static 'assets/images/bronzeBadge.png' %}" alt="Bronze">
+                    {% endif %}
+                </div>
+            </div>
                 <img src="{{ user_profile.profileimg.url }}" class="profile-img" id="profileToggle" alt="Profile">
                 <div class="dropdown" id="dropdownMenu">
                     
