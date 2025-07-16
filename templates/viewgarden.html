@@ -1,160 +1,126 @@
-{% load static %} {% load custom_filters %}
+{% load static %}
+{% load custom_filters %}
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link
-      href="{% static 'assets/images/fav2.png' %}"
-      rel="icon"
-      type="image/png"
-    />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="{% static 'assets/images/fav2.png' %}" rel="icon" type="image/png">
     <title>Herbal Hub - Plant Game</title>
-    <link rel="stylesheet" href="{% static 'assets/css/icons.css' %}" />
-    <link rel="stylesheet" href="{% static 'assets/css/uikit.css' %}" />
-    <link rel="stylesheet" href="{% static 'assets/css/style.css' %}" />
-    <link rel="stylesheet" href="{% static 'assets/css/tailwind.css' %}" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Nerko+One&family=SUSE:wght@100..800&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,100..700;1,100..700&display=swap"
-      rel="stylesheet"
-    />
+    <link rel="stylesheet" href="{% static 'assets/css/icons.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/uikit.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/tailwind.css' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nerko+One&family=SUSE:wght@100..800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,100..700;1,100..700&display=swap" rel="stylesheet">
     <style>
-      body {
-        margin: 0;
-        font-family: "Roboto", sans-serif;
-        background: linear-gradient(135deg, #1ada70, #04c068);
-        color: white;
-        display: flex;
-        flex-direction: column;
-        min-height: 100vh;
-      }
+        body {
+            margin: 0;
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #1ada70, #04c068);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+       
 
-      .divider {
-        height: 1px;
-        background: rgba(255, 255, 255, 0.1);
-        margin: 0.5rem 0;
-      }
-      .garden-section {
-        flex-grow: 1;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        overflow: auto;
-        position: relative;
-        margin-top: -90px;
-        width: 100%;
-        background-image: url("{% static 'assets/images/gameback.jpg' %}");
-        background-size: contain; /* Ensures the image fits the box without cropping */
-        background-repeat: no-repeat; /* Prevents the image from repeating */
-        background-position: center; /* Centers the image in the section */
-      }
-      .garden {
-        display: grid;
-        grid-template-columns: repeat(10, 100px);
-        gap: 0px;
-        margin-top: 250px;
-        background-size: cover;
-        transition: transform 0.2s;
-      }
-      .garden-box {
-        width: 100px;
-        height: 100px;
-        background-size: cover;
+        .divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 0.5rem 0;
+        }
+        .garden-section {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: auto;
+            position: relative;
+            margin-top: -90px;
+            width: 100%;
+            background-image: url("{% static 'assets/images/gameback.jpg' %}");
+            background-size: contain; /* Ensures the image fits the box without cropping */
+            background-repeat: no-repeat; /* Prevents the image from repeating */
+            background-position: center; /* Centers the image in the section */
 
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-weight: bold;
-        color: #fff;
-
-        position: relative;
-      }
+        }
+        .garden {
+            display: grid;
+            grid-template-columns: repeat(10, 100px);
+            gap: 0px;
+            margin-top: 250px;
+            background-size: cover;
+            transition: transform 0.2s;
+            
+        }
+        .garden-box {
+            width: 100px;
+            height: 100px;
+            background-size: cover;
+            
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            color: #fff;
+            
+            position: relative;
+        }
+ 
+        
     </style>
-  </head>
-  <body>
-    {% include 'header.html' %}
+</head>
+<body>
+   {% include 'header.html' %}
 
     <div class="badge-container">
-      <img
-        class="badge-img"
-        src="{% static 'icons/'|add:profile.badge|add:'.png' %}"
-        alt="Badge"
-      />
+        <img class="badge-img" src="{% static 'icons/'|add:profile.badge|add:'.png' %}" alt="Badge">
     </div>
-    <div class="garden-section">
-      <div id="garden" class="garden">
-        {% for row in rows %} {% for col in cols %}
-        <div
-          class="garden-box {% for box in garden_boxes %}{% if box.row == row and box.col == col %}planted{% endif %}{% endfor %}"
-          data-row="{{ row }}"
-          data-col="{{ col }}"
-          id="box-{{ row }}-{{ col }}"
-        >
-          {% for box in garden_boxes %} {% if box.row == row and box.col == col
-          %} {% if box.plant == "Aloe" %}
-          <img
-            src="{% static 'assets/images/aloee.png' %}"
-            alt="Aloe"
-            style="padding: 8px"
-          />
-          {% elif box.plant == "Mint" %}
-          <img
-            src="{% static 'assets/images/mint11.png' %}"
-            alt="Mint"
-            style="padding: 8px"
-          />
-
-          {% elif box.plant == "Lavendra" %}
-          <img
-            src="{% static 'assets/images/ll.png' %}"
-            alt="Lavendra"
-            style="padding: 15px"
-          />
-          {% elif box.plant == "Basil" %}
-          <img src="{% static 'assets/images/basil2.png' %}" alt="Lavendra" />
-          {% elif box.plant == "Road" %}
-          <img src="{% static 'assets/images/roadplant.png' %}" alt="road" />
-          {% elif box.plant == "Stones" %}
-          <img
-            src="{% static 'assets/images/stones.png' %}"
-            alt="road"
-            style="padding: 2px"
-          />
-          {% elif box.plant == "Pond" %}
-          <img src="{% static 'assets/images/pond.png' %}" alt="pond" />
-          {% elif box.plant == "Well3" %}
-          <img src="{% static 'assets/images/well3.png' %}" alt="well" />
-          {% elif box.plant == "Ginger" %}
-          <img
-            src="{% static 'assets/images/gingerrrr.png' %}"
-            alt="ginger"
-            style="padding: 5px; margin-top: 10px"
-          />
-          {% elif box.plant == "Chamomile" %}
-          <img
-            src="{% static 'assets/images/Chamomile.png' %}"
-            alt="Chamomile"
-            style="padding: 5px; margin-top: 30px"
-          />
-          {% elif box.plant == "Fenugreek" %}
-          <img
-            src="{% static 'assets/images/Fenugreekss.png' %}"
-            alt="Fenugreek"
-            style="padding: 5px; margin-top: 40px"
-          />
-          {% elif box.plant == "Neem" %}
-          <img src="{% static 'assets/images/Neem.png' %}" alt="Neem" />
-          {% endif %} {% endif %} {% endfor %}
+    <div class="garden-section">   
+        <div id="garden" class="garden">
+            {% for row in rows %}
+                {% for col in cols %}
+                    <div class="garden-box {% for box in garden_boxes %}{% if box.row == row and box.col == col %}planted{% endif %}{% endfor %}" data-row="{{ row }}" data-col="{{ col }}" id="box-{{ row }}-{{ col }}">
+                        {% for box in garden_boxes %}
+                            {% if box.row == row and box.col == col %}
+                                {% if box.plant == "Aloe" %}
+                                    <img src="{% static 'assets/images/aloee.png' %}" alt="Aloe"  style="padding: 8px;"/>
+                                {% elif box.plant == "Mint" %}
+                                    <img src="{% static 'assets/images/mint11.png' %}" alt="Mint" style="padding: 8px;" />
+                               
+                                {% elif box.plant == "Lavendra" %}
+                                    <img src="{% static 'assets/images/ll.png' %}" alt="Lavendra" style="padding: 15px;" />
+                                {% elif box.plant == "Basil" %}
+                                    <img src="{% static 'assets/images/basil2.png' %}" alt="Lavendra" />
+                                {% elif box.plant == "Road" %}
+                                    <img src="{% static 'assets/images/roadplant.png' %}" alt="road" />
+                                {% elif box.plant == "Stones" %}
+                                    <img src="{% static 'assets/images/stones.png' %}" alt="road" style="padding: 2px;" />
+                                {% elif box.plant == "Pond" %}
+                                    <img src="{% static 'assets/images/pond.png' %}" alt="pond"  />
+                                {% elif box.plant == "Well3" %}
+                                    <img src="{% static 'assets/images/well3.png' %}" alt="well"  />
+                                {% elif box.plant == "Ginger" %}
+                                    <img src="{% static 'assets/images/gingerrrr.png' %}" alt="ginger"  style="padding: 5px; margin-top: 10px; "/>
+                                {% elif box.plant == "Chamomile" %}
+                                    <img src="{% static 'assets/images/Chamomile.png' %}" alt="Chamomile"   style="padding: 5px; margin-top: 30px; "/>
+                                {% elif box.plant == "Fenugreek" %}
+                                    <img src="{% static 'assets/images/Fenugreekss.png' %}" alt="Fenugreek"   style="padding: 5px; margin-top: 40px; " />
+                                {% elif box.plant == "Neem" %}
+                                    <img src="{% static 'assets/images/Neem.png' %}" alt="Neem"  />
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+            {% endfor %}
         </div>
-        {% endfor %} {% endfor %}
-      </div>
     </div>
-    <script></script>
-  </body>
+    <script>
+    </script>
+    
+</body>
 </html>

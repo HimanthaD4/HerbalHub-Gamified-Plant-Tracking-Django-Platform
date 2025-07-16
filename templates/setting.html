@@ -346,62 +346,6 @@
             font-size: 1.2rem;
         }
 
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 24px;
-        }
-
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(255, 255, 255, 0.1);
-            transition: var(--transition);
-            border-radius: 34px;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 16px;
-            width: 16px;
-            left: 4px;
-            bottom: 4px;
-            background-color: var(--light);
-            transition: var(--transition);
-            border-radius: 50%;
-        }
-
-        input:checked + .slider {
-            background-color: var(--accent);
-        }
-
-        input:checked + .slider:before {
-            transform: translateX(26px);
-        }
-
-        .toggle-group {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.8rem 0;
-        }
-
-        .toggle-label {
-            font-weight: 500;
-        }
-
         /* Avatar Upload */
         .avatar-upload {
             display: flex;
@@ -566,13 +510,9 @@
             <div class="profile">
                 <img src="{{ user_profile.profileimg.url }}" class="profile-img" id="profileToggle" alt="Profile">
                 <div class="dropdown" id="dropdownMenu">
-                    <a href="/profile/{{ user.username }}" class="dropdown-item">
-                        <i class="fas fa-user"></i>
-                        <span>My Profile</span>
-                    </a>
                     <a href="/settings" class="dropdown-item">
                         <i class="fas fa-cog"></i>
-                        <span>Settings</span>
+                        <span>My Profile</span>
                     </a>
                     <div class="divider"></div>
                     <a href="logout" class="dropdown-item">
@@ -601,7 +541,10 @@
 
         <div class="settings-grid">
             <!-- Profile Settings -->
-            <div class="settings-card">
+            <form method="POST" action="{% url 'settings' %}" enctype="multipart/form-data" class="settings-card">
+                {% csrf_token %}
+                <input type="hidden" name="profile_form" value="true">
+                
                 <div class="card-header">
                     <i class="fas fa-user-circle card-icon"></i>
                     <h3 class="card-title">Profile Information</h3>
@@ -610,8 +553,8 @@
                 <div class="avatar-upload">
                     <img src="{{ user_profile.profileimg.url }}" class="avatar-preview" id="avatarPreview" alt="Profile Picture">
                     <div class="upload-btn">
-                        <input type="file" id="avatarUpload" accept="image/*" style="display: none;">
-                        <button class="btn btn-secondary" onclick="document.getElementById('avatarUpload').click()">
+                        <input type="file" id="avatarUpload" name="image" accept="image/*" style="display: none;">
+                        <button type="button" class="btn btn-secondary" onclick="document.getElementById('avatarUpload').click()">
                             <i class="fas fa-upload btn-icon"></i>
                             Change Avatar
                         </button>
@@ -624,78 +567,26 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="email" class="form-label">Email Address</label>
-                    <input type="email" id="email" class="form-control" value="{{ user.email }}">
+                    <label for="bio" class="form-label">Bio</label>
+                    <textarea id="bio" name="bio" class="form-control" rows="3" placeholder="Tell us about yourself...">{{ user_profile.bio }}</textarea>
                 </div>
 
                 <div class="form-group">
-                    <label for="bio" class="form-label">Bio</label>
-                    <textarea id="bio" class="form-control" rows="3" placeholder="Tell us about yourself...">{{ user_profile.bio }}</textarea>
+                    <label for="location" class="form-label">Location</label>
+                    <input type="text" id="location" name="location" class="form-control" value="{{ user_profile.location }}" placeholder="Your location">
                 </div>
 
-                <button class="btn btn-primary">
+                <button type="submit" class="btn btn-primary">
                     <i class="fas fa-save btn-icon"></i>
                     Save Changes
                 </button>
-            </div>
-
-            <!-- Preferences -->
-            <div class="settings-card">
-                <div class="card-header">
-                    <i class="fas fa-sliders-h card-icon"></i>
-                    <h3 class="card-title">Preferences</h3>
-                </div>
-
-                <div class="toggle-group">
-                    <span class="toggle-label">Dark Mode</span>
-                    <label class="switch">
-                        <input type="checkbox" checked>
-                        <span class="slider"></span>
-                    </label>
-                </div>
-
-                <div class="toggle-group">
-                    <span class="toggle-label">Email Notifications</span>
-                    <label class="switch">
-                        <input type="checkbox" checked>
-                        <span class="slider"></span>
-                    </label>
-                </div>
-
-                <div class="toggle-group">
-                    <span class="toggle-label">Push Notifications</span>
-                    <label class="switch">
-                        <input type="checkbox">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-
-                <div class="toggle-group">
-                    <span class="toggle-label">Location Services</span>
-                    <label class="switch">
-                        <input type="checkbox" checked>
-                        <span class="slider"></span>
-                    </label>
-                </div>
-
-                <div class="form-group" style="margin-top: 2rem;">
-                    <label for="language" class="form-label">Language</label>
-                    <select id="language" class="form-control">
-                        <option value="en" selected>English</option>
-                        <option value="es">Español</option>
-                        <option value="fr">Français</option>
-                        <option value="de">Deutsch</option>
-                    </select>
-                </div>
-
-                <button class="btn btn-primary">
-                    <i class="fas fa-save btn-icon"></i>
-                    Save Preferences
-                </button>
-            </div>
+            </form>
 
             <!-- Password Change -->
-            <div class="settings-card">
+            <form method="POST" action="{% url 'settings' %}" class="settings-card">
+                {% csrf_token %}
+                <input type="hidden" name="password_form" value="true">
+                
                 <div class="card-header">
                     <i class="fas fa-lock card-icon"></i>
                     <h3 class="card-title">Security</h3>
@@ -703,27 +594,30 @@
 
                 <div class="form-group">
                     <label for="currentPassword" class="form-label">Current Password</label>
-                    <input type="password" id="currentPassword" class="form-control" placeholder="Enter current password">
+                    <input type="password" id="currentPassword" name="currentPassword" class="form-control" placeholder="Enter current password" required>
                 </div>
 
                 <div class="form-group">
                     <label for="newPassword" class="form-label">New Password</label>
-                    <input type="password" id="newPassword" class="form-control" placeholder="Enter new password">
+                    <input type="password" id="newPassword" name="newPassword" class="form-control" placeholder="Enter new password" required>
                 </div>
 
                 <div class="form-group">
                     <label for="confirmPassword" class="form-label">Confirm New Password</label>
-                    <input type="password" id="confirmPassword" class="form-control" placeholder="Confirm new password">
+                    <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" placeholder="Confirm new password" required>
                 </div>
 
-                <button class="btn btn-primary">
+                <button type="submit" class="btn btn-primary">
                     <i class="fas fa-key btn-icon"></i>
                     Change Password
                 </button>
-            </div>
+            </form>
 
             <!-- Danger Zone -->
-            <div class="settings-card danger-zone">
+            <form method="POST" action="{% url 'settings' %}" class="settings-card danger-zone">
+                {% csrf_token %}
+                <input type="hidden" name="delete_account" value="true">
+                
                 <div class="card-header">
                     <i class="fas fa-exclamation-triangle card-icon"></i>
                     <h3 class="card-title">Danger Zone</h3>
@@ -733,11 +627,11 @@
                     <p>Deleting your account will remove all your data permanently. This action cannot be undone.</p>
                 </div>
 
-                <button class="btn btn-danger">
+                <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete your account? This cannot be undone.')">
                     <i class="fas fa-trash-alt btn-icon"></i>
                     Delete Account
                 </button>
-            </div>
+            </form>
         </div>
     </div>
 

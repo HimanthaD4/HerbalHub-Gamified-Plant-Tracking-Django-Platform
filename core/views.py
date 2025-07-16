@@ -79,34 +79,6 @@ def viewgarden(request, user_id):
     })
 
 
-@login_required(login_url='signin')
-def settings(request):
-    user_profile = Profile.objects.get(user=request.user)
-
-    if request.method == 'POST':
-        
-        if request.FILES.get('image') == None:
-            image = user_profile.profileimg
-            bio = request.POST['bio']
-            location = request.POST['location']
-
-            user_profile.profileimg = image
-            user_profile.bio = bio
-            user_profile.location = location
-            user_profile.save()
-        if request.FILES.get('image') != None:
-            image = request.FILES.get('image')
-            bio = request.POST['bio']
-            location = request.POST['location']
-
-            user_profile.profileimg = image
-            user_profile.bio = bio
-            user_profile.location = location
-            user_profile.save()
-        
-        return redirect('settings')
-    return render(request, 'setting.html', {'user_profile': user_profile})
-
 
 @login_required(login_url='signin')
 def index(request):
@@ -430,6 +402,63 @@ def signin(request):
         return render(request, 'signin.html')
 
 
+
+@login_required(login_url='signin')
+def settings(request):
+    user_profile = Profile.objects.get(user=request.user)
+
+    if request.method == 'POST':
+        # Handle profile information update
+        if 'profile_form' in request.POST:
+            user_profile.bio = request.POST.get('bio', '')
+            user_profile.location = request.POST.get('location', '')
+            
+            if 'image' in request.FILES:
+                user_profile.profileimg = request.FILES['image']
+            
+            user_profile.save()
+            return redirect('settings')
+
+        # Handle preferences update
+        elif 'preferences_form' in request.POST:
+            user_profile.dark_mode = 'dark_mode' in request.POST
+            user_profile.email_notifications = 'email_notifications' in request.POST
+            user_profile.push_notifications = 'push_notifications' in request.POST
+            user_profile.location_services = 'location_services' in request.POST
+            user_profile.language = request.POST.get('language', 'en')
+            user_profile.save()
+            return redirect('settings')
+
+        # Handle password change
+        elif 'password_form' in request.POST:
+            current_password = request.POST.get('currentPassword')
+            new_password = request.POST.get('newPassword')
+            confirm_password = request.POST.get('confirmPassword')
+            
+            if (new_password == confirm_password and 
+                request.user.check_password(current_password)):
+                request.user.set_password(new_password)
+                request.user.save()
+                # Log the user back in after password change
+                from django.contrib.auth import login
+                login(request, request.user)
+                return redirect('settings')
+            else:
+                # Handle password change error
+                pass
+
+        # Handle account deletion
+        elif 'delete_account' in request.POST:
+            request.user.delete()
+            return redirect('signin')
+
+    context = {
+        'user_profile': user_profile,
+        'user': request.user
+    }
+    return render(request, 'setting.html', context)
+
+    
 @login_required(login_url='signin')
 def logout(request):
     auth.logout(request)
